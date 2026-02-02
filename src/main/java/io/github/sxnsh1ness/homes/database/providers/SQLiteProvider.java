@@ -1,5 +1,6 @@
 package io.github.sxnsh1ness.homes.database.providers;
 
+import io.github.sxnsh1ness.homes.HomesPlugin;
 import io.github.sxnsh1ness.homes.database.Home;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -13,17 +14,12 @@ import java.util.UUID;
 
 public class SQLiteProvider implements DatabaseProvider {
 
-    private final JavaPlugin plugin;
     private Connection connection;
-
-    public SQLiteProvider(JavaPlugin plugin) {
-        this.plugin = plugin;
-    }
 
     @Override
     public void initialize() {
         try {
-            File dataFolder = plugin.getDataFolder();
+            File dataFolder = HomesPlugin.getInstance().getDataFolder();
             if (!dataFolder.exists()) {
                 dataFolder.mkdirs();
             }
@@ -32,9 +28,9 @@ public class SQLiteProvider implements DatabaseProvider {
             connection = DriverManager.getConnection(url);
 
             createTables();
-            plugin.getLogger().info("SQLite база данных успешно инициализирована!");
+            HomesPlugin.getInstance().getLogger().info("SQLite база данных успешно инициализирована!");
         } catch (SQLException e) {
-            plugin.getLogger().severe("Ошибка инициализации SQLite: " + e.getMessage());
+            HomesPlugin.getInstance().getLogger().severe("Ошибка инициализации SQLite: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -66,7 +62,7 @@ public class SQLiteProvider implements DatabaseProvider {
             stmt.execute(sql);
             stmt.execute(invitesSql);
         } catch (SQLException e) {
-            plugin.getLogger().severe("Ошибка создания таблиц SQLite: " + e.getMessage());
+            HomesPlugin.getInstance().getLogger().severe("Ошибка создания таблиц SQLite: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -142,7 +138,7 @@ public class SQLiteProvider implements DatabaseProvider {
                 );
             }
         } catch (SQLException e) {
-            plugin.getLogger().warning("Ошибка получения дома: " + e.getMessage());
+            HomesPlugin.getInstance().getLogger().warning("Ошибка получения дома: " + e.getMessage());
         }
         return null;
     }
@@ -169,7 +165,7 @@ public class SQLiteProvider implements DatabaseProvider {
                 ));
             }
         } catch (SQLException e) {
-            plugin.getLogger().warning("Ошибка получения списка домов: " + e.getMessage());
+            HomesPlugin.getInstance().getLogger().warning("Ошибка получения списка домов: " + e.getMessage());
         }
         return homes;
     }
@@ -185,7 +181,7 @@ public class SQLiteProvider implements DatabaseProvider {
                 return rs.getInt(1);
             }
         } catch (SQLException e) {
-            plugin.getLogger().warning("Ошибка подсчета домов: " + e.getMessage());
+            HomesPlugin.getInstance().getLogger().warning("Ошибка подсчета домов: " + e.getMessage());
         }
         return 0;
     }
@@ -233,7 +229,7 @@ public class SQLiteProvider implements DatabaseProvider {
                 return rs.getInt(1) > 0;
             }
         } catch (SQLException e) {
-            plugin.getLogger().warning("Ошибка проверки приглашения: " + e.getMessage());
+            HomesPlugin.getInstance().getLogger().warning("Ошибка проверки приглашения: " + e.getMessage());
         }
         return false;
     }
@@ -252,7 +248,7 @@ public class SQLiteProvider implements DatabaseProvider {
                 invitedPlayers.add(UUID.fromString(rs.getString("invited_uuid")));
             }
         } catch (SQLException e) {
-            plugin.getLogger().warning("Ошибка получения списка приглашённых: " + e.getMessage());
+            HomesPlugin.getInstance().getLogger().warning("Ошибка получения списка приглашённых: " + e.getMessage());
         }
         return invitedPlayers;
     }
@@ -281,7 +277,7 @@ public class SQLiteProvider implements DatabaseProvider {
                 ));
             }
         } catch (SQLException e) {
-            plugin.getLogger().warning("Ошибка получения домов с приглашениями: " + e.getMessage());
+            HomesPlugin.getInstance().getLogger().warning("Ошибка получения домов с приглашениями: " + e.getMessage());
         }
         return homes;
     }
@@ -291,10 +287,10 @@ public class SQLiteProvider implements DatabaseProvider {
         try {
             if (connection != null && !connection.isClosed()) {
                 connection.close();
-                plugin.getLogger().info("SQLite соединение закрыто!");
+                HomesPlugin.getInstance().getLogger().info("SQLite соединение закрыто!");
             }
         } catch (SQLException e) {
-            plugin.getLogger().warning("Ошибка закрытия SQLite: " + e.getMessage());
+            HomesPlugin.getInstance().getLogger().warning("Ошибка закрытия SQLite: " + e.getMessage());
         }
     }
 }
