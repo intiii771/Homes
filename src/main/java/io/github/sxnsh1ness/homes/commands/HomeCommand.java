@@ -21,14 +21,12 @@ import java.util.Map;
 
 public class HomeCommand implements CommandExecutor {
 
-    private final DatabaseManager databaseManager;
-    private final ConfigManager configManager;
+    private final DatabaseManager databaseManager;;
     private final TeleportManager teleportManager;
     private final CooldownManager cooldownManager;
 
-    public HomeCommand(DatabaseManager databaseManager, ConfigManager configManager, TeleportManager teleportManager, CooldownManager cooldownManager) {
+    public HomeCommand(DatabaseManager databaseManager, TeleportManager teleportManager, CooldownManager cooldownManager) {
         this.databaseManager = databaseManager;
-        this.configManager = configManager;
         this.teleportManager = teleportManager;
         this.cooldownManager = cooldownManager;
     }
@@ -74,7 +72,7 @@ public class HomeCommand implements CommandExecutor {
 
         if (!cooldownManager.hasCooldown(player)) {
             int remainingTime = cooldownManager.getRemainingCooldown(player);
-            String message = configManager.getMessage("command-on-cooldown",
+            String message = ConfigManager.getMessage("command-on-cooldown",
                     Map.of("time", String.valueOf(remainingTime)));
             player.sendMessage(Component.text(message));
             return true;
@@ -84,7 +82,7 @@ public class HomeCommand implements CommandExecutor {
         Home home = databaseManager.getHome(player.getUniqueId(), homeName);
 
         if (home == null) {
-            String message = configManager.getMessage("home-not-found",
+            String message = ConfigManager.getMessage("home-not-found",
                     Map.of("name", homeName));
             player.sendMessage(Component.text(message));
             return true;
@@ -93,13 +91,13 @@ public class HomeCommand implements CommandExecutor {
         Location location = home.getLocation();
 
         if (location.getWorld() == null) {
-            String message = configManager.getMessage("world-not-found",
+            String message = ConfigManager.getMessage("world-not-found",
                     Map.of("world", home.getWorldName()));
             player.sendMessage(Component.text(message));
             return true;
         }
 
-        boolean applyOnCommand = configManager.getConfig().getBoolean("cooldown.apply-on-command", true);
+        boolean applyOnCommand = ConfigManager.getConfig().getBoolean("cooldown.apply-on-command", true);
         if (applyOnCommand) {
             cooldownManager.setCooldown(player);
         }
@@ -120,7 +118,7 @@ public class HomeCommand implements CommandExecutor {
         // Проверка существования дома
         Home home = databaseManager.getHome(player.getUniqueId(), homeName);
         if (home == null) {
-            String message = configManager.getMessage("home-not-found",
+            String message = ConfigManager.getMessage("home-not-found",
                     Map.of("name", homeName));
             player.sendMessage(Component.text(message));
             return true;
@@ -171,7 +169,7 @@ public class HomeCommand implements CommandExecutor {
         // Проверка существования дома
         Home home = databaseManager.getHome(player.getUniqueId(), homeName);
         if (home == null) {
-            String message = configManager.getMessage("home-not-found",
+            String message = ConfigManager.getMessage("home-not-found",
                     Map.of("name", homeName));
             player.sendMessage(Component.text(message));
             return true;
@@ -231,7 +229,7 @@ public class HomeCommand implements CommandExecutor {
         // Проверка кулдауна
         if (!cooldownManager.hasCooldown(player)) {
             int remainingTime = cooldownManager.getRemainingCooldown(player);
-            String message = configManager.getMessage("command-cooldown",
+            String message = ConfigManager.getMessage("command-cooldown",
                     Map.of("time", String.valueOf(remainingTime)));
             player.sendMessage(Component.text(message));
             return true;
@@ -241,14 +239,14 @@ public class HomeCommand implements CommandExecutor {
 
         // Проверка мира
         if (location.getWorld() == null) {
-            String message = configManager.getMessage("world-not-found",
+            String message = ConfigManager.getMessage("world-not-found",
                     Map.of("world", home.getWorldName()));
             player.sendMessage(Component.text(message));
             return true;
         }
 
         // Устанавливаем кулдаун если нужно
-        boolean applyOnCommand = configManager.getConfig().getBoolean("cooldown.apply-on-command", true);
+        boolean applyOnCommand = ConfigManager.getConfig().getBoolean("cooldown.apply-on-command", true);
         if (applyOnCommand) {
             cooldownManager.setCooldown(player);
         }
@@ -323,7 +321,7 @@ public class HomeCommand implements CommandExecutor {
 
         // Проверка мира
         if (location.getWorld() == null) {
-            String message = configManager.getMessage("world-not-found",
+            String message = ConfigManager.getMessage("world-not-found",
                     Map.of("world", home.getWorldName()));
             player.sendMessage(Component.text(message));
             return true;

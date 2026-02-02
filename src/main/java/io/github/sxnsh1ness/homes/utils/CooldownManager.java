@@ -9,11 +9,9 @@ import java.util.UUID;
 
 public class CooldownManager {
 
-    private final ConfigManager configManager;
     private final Map<UUID, Long> homeCooldowns;
 
-    public CooldownManager(ConfigManager configManager) {
-        this.configManager = configManager;
+    public CooldownManager() {
         this.homeCooldowns = new HashMap<>();
     }
 
@@ -22,7 +20,7 @@ public class CooldownManager {
             return true;
         }
 
-        long cooldownTime = configManager.getConfig().getLong("cooldown.home-command", 3) * 1000;
+        long cooldownTime = ConfigManager.getConfig().getLong("cooldown.home-command", 3) * 1000;
         long lastUse = homeCooldowns.get(player.getUniqueId());
         long currentTime = System.currentTimeMillis();
 
@@ -34,7 +32,7 @@ public class CooldownManager {
             return 0;
         }
 
-        long cooldownTime = configManager.getConfig().getLong("cooldown.home-command", 3) * 1000;
+        long cooldownTime = ConfigManager.getConfig().getLong("cooldown.home-command", 3) * 1000;
         long lastUse = homeCooldowns.get(player.getUniqueId());
         long currentTime = System.currentTimeMillis();
         long remaining = cooldownTime - (currentTime - lastUse);

@@ -1,5 +1,6 @@
 package io.github.sxnsh1ness.homes.gui;
 
+import io.github.sxnsh1ness.homes.HomesPlugin;
 import io.github.sxnsh1ness.homes.config.ConfigManager;
 import io.github.sxnsh1ness.homes.database.DatabaseManager;
 import io.github.sxnsh1ness.homes.database.Home;
@@ -28,9 +29,7 @@ import java.util.*;
 
 public class HomeGUI implements Listener {
 
-    private final JavaPlugin plugin;
     private final DatabaseManager databaseManager;
-    private final ConfigManager configManager;
     private final TeleportManager teleportManager;
     private final CooldownManager cooldownManager;
     @Setter
@@ -44,13 +43,11 @@ public class HomeGUI implements Listener {
 
     private static final int ITEMS_PER_PAGE = 28; // 4 ряда по 7 предметов
 
-    public HomeGUI(JavaPlugin plugin, DatabaseManager databaseManager, ConfigManager configManager, TeleportManager teleportManager, CooldownManager cooldownManager) {
-        this.plugin = plugin;
+    public HomeGUI(DatabaseManager databaseManager, TeleportManager teleportManager, CooldownManager cooldownManager) {
         this.databaseManager = databaseManager;
-        this.configManager = configManager;
         this.teleportManager = teleportManager;
         this.cooldownManager = cooldownManager;
-        plugin.getServer().getPluginManager().registerEvents(this, plugin);
+        HomesPlugin.getInstance().getServer().getPluginManager().registerEvents(this, HomesPlugin.getInstance());
     }
 
     public void openGUI(Player player, int page) {
@@ -79,7 +76,7 @@ public class HomeGUI implements Listener {
         }
 
         // Добавляем кнопку создания дома
-        int playerLimit = LuckPermsHelper.getHighestLimit(player, configManager);
+        int playerLimit = LuckPermsHelper.getHighestLimit(player);
         String limitDisplay = playerLimit == -1 ? "∞" : String.valueOf(playerLimit);
 
         if (playerLimit == -1 || homes.size() < playerLimit) {
@@ -290,7 +287,7 @@ public class HomeGUI implements Listener {
                 // Проверка кулдауна
                 if (!cooldownManager.hasCooldown(player)) {
                     int remainingTime = cooldownManager.getRemainingCooldown(player);
-                    String message = configManager.getMessage("command-on-cooldown",
+                    String message = ConfigManager.getMessage("command-on-cooldown",
                             Map.of("time", String.valueOf(remainingTime)));
                     player.sendMessage(Component.text(message));
                     return;
@@ -298,14 +295,14 @@ public class HomeGUI implements Listener {
 
                 // Проверка мира
                 if (home.getLocation().getWorld() == null) {
-                    String message = configManager.getMessage("world-not-found",
+                    String message = ConfigManager.getMessage("world-not-found",
                             Map.of("world", home.getWorldName()));
                     player.sendMessage(Component.text(message));
                     return;
                 }
 
                 // Устанавливаем кулдаун если нужно
-                boolean applyOnCommand = configManager.getConfig().getBoolean("cooldown.apply-on-command", true);
+                boolean applyOnCommand = ConfigManager.getConfig().getBoolean("cooldown.apply-on-command", true);
                 if (applyOnCommand) {
                     cooldownManager.setCooldown(player);
                 }
@@ -339,7 +336,7 @@ public class HomeGUI implements Listener {
                 boolean success = databaseManager.deleteHome(player.getUniqueId(), homeName);
 
                 if (success) {
-                    String message = configManager.getMessage("home-deleted",
+                    String message = ConfigManager.getMessage("home-deleted",
                             Map.of("name", homeName));
                     player.sendMessage(Component.text(message));
                     openGUI(player, playerPages.getOrDefault(player.getUniqueId(), 0));

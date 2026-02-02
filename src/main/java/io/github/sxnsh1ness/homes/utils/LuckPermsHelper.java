@@ -53,20 +53,20 @@ public class LuckPermsHelper {
                 .toList();
     }
 
-    public static int getHighestLimit(Player player, ConfigManager configManager) {
+    public static int getHighestLimit(Player player) {
         if (luckPerms == null) {
-            return configManager.getDefaultLimit();
+            return ConfigManager.getDefaultLimit();
         }
 
         Collection<String> groups = getAllGroups(player);
         if (groups == null || groups.isEmpty()) {
-            return configManager.getDefaultLimit();
+            return ConfigManager.getDefaultLimit();
         }
 
-        int highestLimit = configManager.getDefaultLimit();
+        int highestLimit = ConfigManager.getDefaultLimit();
 
         for (String group : groups) {
-            int limit = configManager.getLimitForGroup(group);
+            int limit = ConfigManager.getLimitForGroup(group);
             if (limit == -1) {
                 return -1;
             }

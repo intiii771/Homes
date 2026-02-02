@@ -1,32 +1,33 @@
 package io.github.sxnsh1ness.homes.config;
 
+import io.github.sxnsh1ness.homes.HomesPlugin;
 import lombok.Getter;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
 public class ConfigManager {
 
-    private final JavaPlugin plugin;
+    private static File file;
     @Getter
-    private FileConfiguration config;
-    private Map<String, Integer> groupLimits;
+    private static FileConfiguration config;
+    private static final Map<String, Integer> groupLimits = new HashMap<>();
     @Getter
-    private int defaultLimit;
+    private static int defaultLimit;
 
-    public ConfigManager(JavaPlugin plugin) {
-        this.plugin = plugin;
-        loadConfig();
-    }
 
-    public void loadConfig() {
-        plugin.saveDefaultConfig();
-        plugin.reloadConfig();
-        config = plugin.getConfig();
+    public static void loadConfig() {
+        file = new File(HomesPlugin.getInstance().getDataFolder(), "config.yml");
+        if (!file.exists()) {
+            HomesPlugin.getInstance().saveResource("config.yml", false);
+        }
 
-        groupLimits = new HashMap<>();
+        config = YamlConfiguration.loadConfiguration(file);
 
         if (config.contains("group-limits")) {
             for (String group : config.getConfigurationSection("group-limits").getKeys(false)) {
@@ -35,25 +36,24 @@ public class ConfigManager {
             }
         }
 
-        defaultLimit = config.getInt("default-limit", 3);
+        defaultLimit = config.getInt("default-limit", 2);
     }
 
     public void reloadConfig() {
-        loadConfig();
+        config = YamlConfiguration.loadConfiguration(file);
     }
 
-    public int getLimitForGroup(String group) {
-        if (group == null) {
-            return defaultLimit;
-        }
+    public static int getLimitForGroup(String group) {
+        if (group == null) return defaultLimit;
+
         return groupLimits.getOrDefault(group.toLowerCase(), defaultLimit);
     }
 
-    public String getMessage(String key) {
+    public static String getMessage(String key) {
         return translateColors(config.getString("messages." + key, "&cСообщение не найдено: " + key));
     }
 
-    public String getMessage(String key, Map<String, String> placeholders) {
+    public static String getMessage(String key, Map<String, String> placeholders) {
         String message = getMessage(key);
         for (Map.Entry<String, String> entry : placeholders.entrySet()) {
             message = message.replace("{" + entry.getKey() + "}", entry.getValue());
@@ -61,7 +61,7 @@ public class ConfigManager {
         return message;
     }
 
-    private String translateColors(String message) {
+    private static String translateColors(String message) {
         return message.replace("&", "§");
     }
 }

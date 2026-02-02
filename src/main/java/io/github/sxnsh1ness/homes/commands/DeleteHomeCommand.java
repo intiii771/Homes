@@ -14,11 +14,9 @@ import java.util.Map;
 public class DeleteHomeCommand implements CommandExecutor {
 
     private final DatabaseManager databaseManager;
-    private final ConfigManager configManager;
 
-    public DeleteHomeCommand(DatabaseManager databaseManager, ConfigManager configManager) {
+    public DeleteHomeCommand(DatabaseManager databaseManager) {
         this.databaseManager = databaseManager;
-        this.configManager = configManager;
     }
 
     @Override
@@ -37,11 +35,11 @@ public class DeleteHomeCommand implements CommandExecutor {
         boolean success = databaseManager.deleteHome(player.getUniqueId(), homeName);
 
         if (success) {
-            String message = configManager.getMessage("home-deleted",
+            String message = ConfigManager.getMessage("home-deleted",
                     Map.of("name", homeName));
             player.sendMessage(Component.text(message));
         } else {
-            String message = configManager.getMessage("home-not-found",
+            String message = ConfigManager.getMessage("home-not-found",
                     Map.of("name", homeName));
             player.sendMessage(Component.text(message));
         }

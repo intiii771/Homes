@@ -17,11 +17,9 @@ import java.util.Map;
 public class HomesCommand implements CommandExecutor {
 
     private final DatabaseManager databaseManager;
-    private final ConfigManager configManager;
 
-    public HomesCommand(DatabaseManager databaseManager, ConfigManager configManager) {
+    public HomesCommand(DatabaseManager databaseManager) {
         this.databaseManager = databaseManager;
-        this.configManager = configManager;
     }
 
     @Override
@@ -32,24 +30,24 @@ public class HomesCommand implements CommandExecutor {
         }
 
         List<Home> homes = databaseManager.getHomes(player.getUniqueId());
-        int playerLimit = LuckPermsHelper.getHighestLimit(player, configManager);
+        int playerLimit = LuckPermsHelper.getHighestLimit(player);
         String limitDisplay = playerLimit == -1 ? "∞" : String.valueOf(playerLimit);
 
         if (homes.isEmpty()) {
-            String message = configManager.getMessage("no-homes");
+            String message = ConfigManager.getMessage("no-homes");
             player.sendMessage(Component.text(message));
             player.sendMessage(Component.text("Используйте /sethome <название> чтобы создать дом."));
             return true;
         }
 
-        String header = configManager.getMessage("homes-header");
+        String header = ConfigManager.getMessage("homes-header");
         player.sendMessage(Component.text(header));
 
-        String title = configManager.getMessage("homes-title",
+        String title = ConfigManager.getMessage("homes-title",
                 Map.of("count", String.valueOf(homes.size()), "limit", limitDisplay));
         player.sendMessage(Component.text(title));
 
-        player.sendMessage(Component.text(configManager.getMessage("homes-header")));
+        player.sendMessage(Component.text(ConfigManager.getMessage("homes-header")));
 
         for (Home home : homes) {
             String homeLine = String.format("§8• §b§l%s §8- §a%s §8(§7%.0f, %.0f, %.0f§8)",
@@ -62,10 +60,10 @@ public class HomesCommand implements CommandExecutor {
             player.sendMessage(Component.text(homeLine));
         }
 
-        String footer = configManager.getMessage("homes-footer");
+        String footer = ConfigManager.getMessage("homes-footer");
         player.sendMessage(Component.text(footer));
 
-        String hint = configManager.getMessage("homes-hint");
+        String hint = ConfigManager.getMessage("homes-hint");
         player.sendMessage(Component.text(hint));
         return true;
     }

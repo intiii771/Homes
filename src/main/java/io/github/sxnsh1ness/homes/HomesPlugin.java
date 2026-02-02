@@ -2,6 +2,7 @@ package io.github.sxnsh1ness.homes;
 
 import io.github.sxnsh1ness.homes.commands.*;
 import io.github.sxnsh1ness.homes.config.ConfigManager;
+import io.github.sxnsh1ness.homes.config.PluginMessages;
 import io.github.sxnsh1ness.homes.database.DatabaseManager;
 import io.github.sxnsh1ness.homes.gui.HomeGUI;
 import io.github.sxnsh1ness.homes.gui.InviteGUI;
@@ -19,8 +20,6 @@ public final class HomesPlugin extends JavaPlugin {
     @Getter
     private DatabaseManager databaseManager;
     @Getter
-    private ConfigManager configManager;
-    @Getter
     private CooldownManager cooldownManager;
     @Getter
     private TeleportManager teleportManager;
@@ -30,7 +29,8 @@ public final class HomesPlugin extends JavaPlugin {
     @Override
     public void onEnable() {
         instance = this;
-        configManager = new ConfigManager(this);
+        ConfigManager.loadConfig();
+        PluginMessages.loadMessages();
 
         if (!LuckPermsHelper.setupLuckPerms()) {
             getLogger().severe("LuckPerms не найден! Плагин будет отключен.");
@@ -40,22 +40,22 @@ public final class HomesPlugin extends JavaPlugin {
         databaseManager = new DatabaseManager(this);
         databaseManager.initialize();
 
-        cooldownManager = new CooldownManager(configManager);
+        cooldownManager = new CooldownManager();
 
-        teleportManager = new TeleportManager(this, configManager, cooldownManager);
+        teleportManager = new TeleportManager(this, cooldownManager);
 
-        homeGUI = new HomeGUI(this, databaseManager, configManager, teleportManager, cooldownManager);
+        homeGUI = new HomeGUI(databaseManager, teleportManager, cooldownManager);
         InviteGUI inviteGUI = new InviteGUI(this, databaseManager, homeGUI);
         homeGUI.setInviteGUI(inviteGUI);
-        ChatListener chatListener = new ChatListener(this, databaseManager, configManager, homeGUI);
+        ChatListener chatListener = new ChatListener(databaseManager, homeGUI);
         chatListener.setInviteGUI(inviteGUI);
         getServer().getPluginManager().registerEvents(chatListener, this);
 
-        getCommand("home").setExecutor(new HomeCommand(databaseManager, configManager, teleportManager, cooldownManager));
-        getCommand("sethome").setExecutor(new SetHomeCommand(databaseManager, configManager));
-        getCommand("deletehome").setExecutor(new DeleteHomeCommand(databaseManager, configManager));
-        getCommand("renamehome").setExecutor(new RenameHomeCommand(databaseManager, configManager));
-        getCommand("homes").setExecutor(new HomesCommand(databaseManager, configManager));
+        getCommand("home").setExecutor(new HomeCommand(databaseManager, teleportManager, cooldownManager));
+        getCommand("sethome").setExecutor(new SetHomeCommand(databaseManager));
+        getCommand("deletehome").setExecutor(new DeleteHomeCommand(databaseManager));
+        getCommand("renamehome").setExecutor(new RenameHomeCommand(databaseManager));
+        getCommand("homes").setExecutor(new HomesCommand(databaseManager));
         getCommand("homegui").setExecutor(new HomeGUICommand(homeGUI));
     }
 

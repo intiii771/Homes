@@ -14,11 +14,9 @@ import java.util.Map;
 public class RenameHomeCommand implements CommandExecutor {
 
     private final DatabaseManager databaseManager;
-    private final ConfigManager configManager;
 
-    public RenameHomeCommand(DatabaseManager databaseManager, ConfigManager configManager) {
+    public RenameHomeCommand(DatabaseManager databaseManager) {
         this.databaseManager = databaseManager;
-        this.configManager = configManager;
     }
 
     @Override
@@ -37,20 +35,20 @@ public class RenameHomeCommand implements CommandExecutor {
         String newName = args[1];
 
         if (newName.length() > 16) {
-            String message = configManager.getMessage("name-too-long");
+            String message = ConfigManager.getMessage("name-too-long");
             player.sendMessage(Component.text(message));
             return true;
         }
 
         if (!newName.matches("[a-zA-Zа-яА-Я0-9_-]+")) {
-            String message = configManager.getMessage("invalid-name");
+            String message = ConfigManager.getMessage("invalid-name");
             player.sendMessage(Component.text(message));
             return true;
         }
 
         // Проверка, существует ли старый дом
         if (databaseManager.getHome(player.getUniqueId(), oldName) == null) {
-            String message = configManager.getMessage("home-not-found",
+            String message = ConfigManager.getMessage("home-not-found",
                     Map.of("name", oldName));
             player.sendMessage(Component.text(message));
             return true;
@@ -58,7 +56,7 @@ public class RenameHomeCommand implements CommandExecutor {
 
         // Проверка, не существует ли уже дом с новым названием
         if (databaseManager.getHome(player.getUniqueId(), newName) != null) {
-            String message = configManager.getMessage("home-exists",
+            String message = ConfigManager.getMessage("home-exists",
                     Map.of("name", newName));
             player.sendMessage(Component.text(message));
             return true;
@@ -67,7 +65,7 @@ public class RenameHomeCommand implements CommandExecutor {
         boolean success = databaseManager.renameHome(player.getUniqueId(), oldName, newName);
 
         if (success) {
-            String message = configManager.getMessage("home-renamed",
+            String message = ConfigManager.getMessage("home-renamed",
                     Map.of("old", oldName, "new", newName));
             player.sendMessage(Component.text(message));
         } else {

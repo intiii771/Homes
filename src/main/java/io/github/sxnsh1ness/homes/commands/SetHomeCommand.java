@@ -16,11 +16,9 @@ import java.util.Map;
 public class SetHomeCommand implements CommandExecutor {
 
     private final DatabaseManager databaseManager;
-    private final ConfigManager configManager;
 
-    public SetHomeCommand(DatabaseManager databaseManager, ConfigManager configManager) {
+    public SetHomeCommand(DatabaseManager databaseManager) {
         this.databaseManager = databaseManager;
-        this.configManager = configManager;
     }
 
     @Override
@@ -38,25 +36,25 @@ public class SetHomeCommand implements CommandExecutor {
         String homeName = args[0];
 
         if (homeName.length() > 16) {
-            String message = configManager.getMessage("name-too-long");
+            String message = ConfigManager.getMessage("name-too-long");
             player.sendMessage(Component.text(message));
             return true;
         }
 
         if (!homeName.matches("[a-zA-Zа-яА-Я0-9_-]+")) {
-            String message = configManager.getMessage("invalid-name");
+            String message = ConfigManager.getMessage("invalid-name");
             player.sendMessage(Component.text(message));
             return true;
         }
 
-        int playerLimit = LuckPermsHelper.getHighestLimit(player, configManager);
+        int playerLimit = LuckPermsHelper.getHighestLimit(player);
 
         int homeCount = databaseManager.getHomeCount(player.getUniqueId());
         boolean homeExists = databaseManager.getHome(player.getUniqueId(), homeName) != null;
 
         // Если лимит не безлимитный (-1) и дом новый (не обновление)
         if (playerLimit != -1 && homeCount >= playerLimit && !homeExists) {
-            String message = configManager.getMessage("home-limit-reached",
+            String message = ConfigManager.getMessage("home-limit-reached",
                     Map.of("limit", String.valueOf(playerLimit)));
             player.sendMessage(Component.text(message));
             return true;
@@ -66,13 +64,13 @@ public class SetHomeCommand implements CommandExecutor {
         boolean success = databaseManager.createHome(player.getUniqueId(), homeName, player.getLocation());
 
         if (success) {
-            String message = configManager.getMessage("home-set",
+            String message = ConfigManager.getMessage("home-set",
                     Map.of("name", homeName));
             player.sendMessage(Component.text(message));
         } else {
             databaseManager.deleteHome(player.getUniqueId(), homeName);
             databaseManager.createHome(player.getUniqueId(), homeName, player.getLocation());
-            String message = configManager.getMessage("home-updated",
+            String message = ConfigManager.getMessage("home-updated",
                     Map.of("name", homeName));
             player.sendMessage(Component.text(message));
         }

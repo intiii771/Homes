@@ -1,12 +1,12 @@
 package io.github.sxnsh1ness.homes.listeners;
 
+import io.github.sxnsh1ness.homes.HomesPlugin;
 import io.github.sxnsh1ness.homes.config.ConfigManager;
 import io.github.sxnsh1ness.homes.database.DatabaseManager;
 import io.github.sxnsh1ness.homes.gui.HomeGUI;
 import io.github.sxnsh1ness.homes.gui.InviteGUI;
 import io.github.sxnsh1ness.homes.utils.LuckPermsHelper;
 import io.papermc.paper.event.player.AsyncChatEvent;
-import lombok.Getter;
 import lombok.Setter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
@@ -16,24 +16,19 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.Map;
 import java.util.UUID;
 
 public class ChatListener implements Listener {
 
-    private final JavaPlugin plugin;
     private final DatabaseManager databaseManager;
-    private final ConfigManager configManager;
     private final HomeGUI homeGUI;
     @Setter
     private InviteGUI inviteGUI;
 
-    public ChatListener(JavaPlugin plugin, DatabaseManager databaseManager, ConfigManager configManager, HomeGUI homeGUI) {
-        this.plugin = plugin;
+    public ChatListener(DatabaseManager databaseManager, HomeGUI homeGUI) {
         this.databaseManager = databaseManager;
-        this.configManager = configManager;
         this.homeGUI = homeGUI;
     }
 
@@ -65,7 +60,7 @@ public class ChatListener implements Listener {
                     player.sendMessage(Component.text(""));
 
                     // Открываем меню обратно
-                    Bukkit.getScheduler().runTask(plugin, () -> {
+                    Bukkit.getScheduler().runTask(HomesPlugin.getInstance(), () -> {
                         inviteGUI.openInviteMenu(player, homeName);
                     });
                     return;
@@ -80,7 +75,7 @@ public class ChatListener implements Listener {
                     player.sendMessage(Component.text(""));
 
                     // Открываем меню обратно
-                    Bukkit.getScheduler().runTask(plugin, () -> {
+                    Bukkit.getScheduler().runTask(HomesPlugin.getInstance(), () -> {
                         inviteGUI.openInviteMenu(player, homeName);
                     });
                     return;
@@ -94,7 +89,7 @@ public class ChatListener implements Listener {
                     player.sendMessage(Component.text(""));
 
                     // Открываем меню обратно
-                    Bukkit.getScheduler().runTask(plugin, () -> {
+                    Bukkit.getScheduler().runTask(HomesPlugin.getInstance(), () -> {
                         inviteGUI.openInviteMenu(player, homeName);
                     });
                     return;
@@ -108,7 +103,7 @@ public class ChatListener implements Listener {
                     player.sendMessage(Component.text(""));
 
                     // Открываем меню обратно
-                    Bukkit.getScheduler().runTask(plugin, () -> {
+                    Bukkit.getScheduler().runTask(HomesPlugin.getInstance(), () -> {
                         inviteGUI.openInviteMenu(player, homeName);
                     });
                     return;
@@ -131,7 +126,7 @@ public class ChatListener implements Listener {
                     targetPlayer.sendMessage(Component.text(""));
 
                     // Открываем обновленное меню
-                    Bukkit.getScheduler().runTask(plugin, () -> {
+                    Bukkit.getScheduler().runTask(HomesPlugin.getInstance(), () -> {
                         inviteGUI.openInviteMenu(player, homeName);
                     });
                 } else {
@@ -158,21 +153,21 @@ public class ChatListener implements Listener {
 
             // Проверка длины
             if (newName.length() > 16) {
-                String message = configManager.getMessage("name-too-long");
+                String message = ConfigManager.getMessage("name-too-long");
                 player.sendMessage(Component.text(message));
                 return;
             }
 
             // Проверка символов
             if (!newName.matches("[a-zA-Zа-яА-Я0-9_-]+")) {
-                String message = configManager.getMessage("invalid-name");
+                String message = ConfigManager.getMessage("invalid-name");
                 player.sendMessage(Component.text(message));
                 return;
             }
 
             // Проверка существования
             if (databaseManager.getHome(uuid, newName) != null) {
-                String message = configManager.getMessage("home-exists",
+                String message = ConfigManager.getMessage("home-exists",
                         Map.of("name", newName));
                 player.sendMessage(Component.text(message));
                 return;
@@ -182,7 +177,7 @@ public class ChatListener implements Listener {
             boolean success = databaseManager.renameHome(uuid, oldName, newName);
 
             if (success) {
-                String message = configManager.getMessage("home-renamed",
+                String message = ConfigManager.getMessage("home-renamed",
                         Map.of("old", oldName, "new", newName));
                 player.sendMessage(Component.text(message));
             } else {
@@ -210,24 +205,24 @@ public class ChatListener implements Listener {
 
             // Проверка длины
             if (homeName.length() > 16) {
-                String message = configManager.getMessage("name-too-long");
+                String message = ConfigManager.getMessage("name-too-long");
                 player.sendMessage(Component.text(message));
                 return;
             }
 
             // Проверка символов
             if (!homeName.matches("[a-zA-Zа-яА-Я0-9_-]+")) {
-                String message = configManager.getMessage("invalid-name");
+                String message = ConfigManager.getMessage("invalid-name");
                 player.sendMessage(Component.text(message));
                 return;
             }
 
             // Проверка лимита
             int homeCount = databaseManager.getHomeCount(uuid);
-            int limit = LuckPermsHelper.getHighestLimit(player, configManager);
+            int limit = LuckPermsHelper.getHighestLimit(player);
 
             if (limit != -1 && homeCount >= limit) {
-                String message = configManager.getMessage("home-limit-reached",
+                String message = ConfigManager.getMessage("home-limit-reached",
                         Map.of("limit", String.valueOf(limit)));
                 player.sendMessage(Component.text(message));
                 return;
@@ -239,14 +234,14 @@ public class ChatListener implements Listener {
                 boolean success = databaseManager.createHome(uuid, homeName, player.getLocation());
 
                 if (success) {
-                    String message = configManager.getMessage("home-updated",
+                    String message = ConfigManager.getMessage("home-updated",
                             Map.of("name", homeName));
                     player.sendMessage(Component.text(""));
                     player.sendMessage(Component.text(message));
                     player.sendMessage(Component.text(""));
 
                     // Открываем GUI обратно через синхронную задачу
-                    Bukkit.getScheduler().runTask(plugin, () -> {
+                    Bukkit.getScheduler().runTask(HomesPlugin.getInstance(), () -> {
                         homeGUI.openGUI(player, 0);
                     });
                 } else {
@@ -259,14 +254,14 @@ public class ChatListener implements Listener {
             boolean success = databaseManager.createHome(uuid, homeName, player.getLocation());
 
             if (success) {
-                String message = configManager.getMessage("home-set",
+                String message = ConfigManager.getMessage("home-set",
                         Map.of("name", homeName));
                 player.sendMessage(Component.text(""));
                 player.sendMessage(Component.text(message));
                 player.sendMessage(Component.text(""));
 
                 // Открываем GUI обратно через синхронную задачу
-                Bukkit.getScheduler().runTask(plugin, () -> {
+                Bukkit.getScheduler().runTask(HomesPlugin.getInstance(), () -> {
                     homeGUI.openGUI(player, 0);
                 });
             } else {

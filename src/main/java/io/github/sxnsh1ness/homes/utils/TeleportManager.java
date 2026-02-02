@@ -1,5 +1,6 @@
 package io.github.sxnsh1ness.homes.utils;
 
+import io.github.sxnsh1ness.homes.HomesPlugin;
 import io.github.sxnsh1ness.homes.config.ConfigManager;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
@@ -17,13 +18,11 @@ import java.util.UUID;
 public class TeleportManager {
 
     private final JavaPlugin plugin;
-    private final ConfigManager configManager;
     private final CooldownManager cooldownManager;
     private final Map<UUID, TeleportTask> activeTeleports;
 
-    public TeleportManager(JavaPlugin plugin, ConfigManager configManager, CooldownManager cooldownManager) {
+    public TeleportManager(JavaPlugin plugin, CooldownManager cooldownManager) {
         this.plugin = plugin;
-        this.configManager = configManager;
         this.cooldownManager = cooldownManager;
         this.activeTeleports = new HashMap<>();
     }
@@ -32,7 +31,7 @@ public class TeleportManager {
         // Отменяем предыдущую телепортацию если она есть
         cancelTeleport(player);
 
-        int delay = configManager.getConfig().getInt("teleport.delay", 5);
+        int delay = ConfigManager.getConfig().getInt("teleport.delay", 5);
 
         // Если задержка 0 или меньше, телепортируем сразу
         if (delay <= 0) {
@@ -43,7 +42,7 @@ public class TeleportManager {
         // Сохраняем начальную позицию
         Location startLocation = player.getLocation().clone();
 
-        String message = configManager.getMessage("teleport-started");
+        String message = ConfigManager.getMessage("teleport-started");
         player.sendMessage(message);
 
         TeleportTask task = new TeleportTask(player, startLocation, destination, homeName, delay);
@@ -54,12 +53,12 @@ public class TeleportManager {
     private void teleportImmediately(Player player, Location destination, String homeName) {
         player.teleport(destination);
 
-        String message = configManager.getMessage("home-teleported",
+        String message = ConfigManager.getMessage("home-teleported",
                 Map.of("name", homeName));
         player.sendMessage(message);
 
         // Устанавливаем кулдаун если нужно
-        boolean applyOnCommand = configManager.getConfig().getBoolean("cooldown.apply-on-command", true);
+        boolean applyOnCommand = ConfigManager.getConfig().getBoolean("cooldown.apply-on-command", true);
         if (!applyOnCommand) {
             cooldownManager.setCooldown(player);
         }
@@ -98,9 +97,9 @@ public class TeleportManager {
         public void start() {
             createBossBar();
 
-            this.runTaskTimer(plugin, 0L, 1L);
+            this.runTaskTimer(HomesPlugin.getInstance(), 0L, 1L);
 
-            if (configManager.getConfig().getBoolean("teleport.show-flame-effects", true)) {
+            if (ConfigManager.getConfig().getBoolean("teleport.show-flame-effects", true)) {
                 particleTask = new BukkitRunnable() {
                     @Override
                     public void run() {
@@ -121,14 +120,14 @@ public class TeleportManager {
                             player.getWorld().spawnParticle(Particle.FLAME, particleLoc, 1, 0, 0, 0, 0);
                         }
                     }
-                }.runTaskTimer(plugin, 0L, 2L);
+                }.runTaskTimer(HomesPlugin.getInstance(), 0L, 2L);
             }
         }
 
         private void createBossBar() {
-            String titleTemplate = configManager.getConfig().getString("teleport.bossbar.title", "&6&lТелепортация через {time}с");
-            String colorName = configManager.getConfig().getString("teleport.bossbar.color", "YELLOW");
-            String styleName = configManager.getConfig().getString("teleport.bossbar.style", "PROGRESS");
+            String titleTemplate = ConfigManager.getConfig().getString("teleport.bossbar.title", "&6&lТелепортация через {time}с");
+            String colorName = ConfigManager.getConfig().getString("teleport.bossbar.color", "YELLOW");
+            String styleName = ConfigManager.getConfig().getString("teleport.bossbar.style", "PROGRESS");
 
             BossBar.Color color;
             try {
@@ -158,7 +157,7 @@ public class TeleportManager {
         private void updateBossBar(int secondsLeft) {
             if (bossBar == null) return;
 
-            String titleTemplate = configManager.getConfig().getString("teleport.bossbar.title", "&6&lТелепортация через {time}с");
+            String titleTemplate = ConfigManager.getConfig().getString("teleport.bossbar.title", "&6&lТелепортация через {time}с");
             String title = titleTemplate.replace("{time}", String.valueOf(secondsLeft)).replace("&", "§");
 
             bossBar.name(Component.text(title));
@@ -173,9 +172,9 @@ public class TeleportManager {
             }
 
             // Проверяем, не сдвинулся ли игрок
-            boolean cancelOnMove = configManager.getConfig().getBoolean("teleport.cancel-on-move", true);
+            boolean cancelOnMove = ConfigManager.getConfig().getBoolean("teleport.cancel-on-move", true);
             if (cancelOnMove && hasMoved()) {
-                String message = configManager.getMessage("teleport-cancelled");
+                String message = ConfigManager.getMessage("teleport-cancelled");
                 player.sendMessage(message);
                 cleanup();
                 return;
@@ -191,13 +190,13 @@ public class TeleportManager {
             if (ticksLeft <= 0) {
                 player.teleport(destination);
 
-                String message = configManager.getMessage("home-teleported",
+                String message = ConfigManager.getMessage("home-teleported",
                         Map.of("name", homeName));
                 player.sendMessage(message);
 
                 player.getWorld().spawnParticle(Particle.PORTAL, destination, 50, 0.5, 1, 0.5, 0.1);
 
-                boolean applyOnCommand = configManager.getConfig().getBoolean("cooldown.apply-on-command", true);
+                boolean applyOnCommand = ConfigManager.getConfig().getBoolean("cooldown.apply-on-command", true);
                 if (!applyOnCommand) {
                     cooldownManager.setCooldown(player);
                 }
