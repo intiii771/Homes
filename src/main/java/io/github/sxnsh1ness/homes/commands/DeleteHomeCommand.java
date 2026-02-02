@@ -1,6 +1,6 @@
 package io.github.sxnsh1ness.homes.commands;
 
-import io.github.sxnsh1ness.homes.config.ConfigManager;
+import io.github.sxnsh1ness.homes.config.PluginMessages;
 import io.github.sxnsh1ness.homes.database.DatabaseManager;
 import net.kyori.adventure.text.Component;
 import org.bukkit.command.Command;
@@ -8,8 +8,6 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jspecify.annotations.NonNull;
-
-import java.util.Map;
 
 public class DeleteHomeCommand implements CommandExecutor {
 
@@ -35,13 +33,9 @@ public class DeleteHomeCommand implements CommandExecutor {
         boolean success = databaseManager.deleteHome(player.getUniqueId(), homeName);
 
         if (success) {
-            String message = ConfigManager.getMessage("home-deleted",
-                    Map.of("name", homeName));
-            player.sendMessage(Component.text(message));
+            PluginMessages.send(player, "home-deleted", "{name}", homeName);
         } else {
-            String message = ConfigManager.getMessage("home-not-found",
-                    Map.of("name", homeName));
-            player.sendMessage(Component.text(message));
+            PluginMessages.send(player, "home-not-found", "{name}", homeName);
         }
 
         return true;
