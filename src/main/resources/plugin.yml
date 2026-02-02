@@ -1,4 +1,4 @@
-name: HomesPlugin
+name: Homes
 version: ${version}
 main: io.github.sxnsh1ness.homes.HomesPlugin
 api-version: '1.21'
