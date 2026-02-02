@@ -48,20 +48,4 @@ public class ConfigManager {
 
         return groupLimits.getOrDefault(group.toLowerCase(), defaultLimit);
     }
-
-    public static String getMessage(String key) {
-        return translateColors(config.getString("messages." + key, "&cСообщение не найдено: " + key));
-    }
-
-    public static String getMessage(String key, Map<String, String> placeholders) {
-        String message = getMessage(key);
-        for (Map.Entry<String, String> entry : placeholders.entrySet()) {
-            message = message.replace("{" + entry.getKey() + "}", entry.getValue());
-        }
-        return message;
-    }
-
-    private static String translateColors(String message) {
-        return message.replace("&", "§");
-    }
 }
